@@ -6,6 +6,7 @@ import com.PickMeUP.BackEnd.Personnage;
 import com.PickMeUP.FrontEnd.GUI;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class GameManager{
 	/*** Enum ***/
@@ -44,103 +45,40 @@ public class GameManager{
 		}
 	}
 
-	private void RegulMouvement(Personnage perso) {
-		int prevPosX = perso.getPosX();
-		int prevPosY = perso.getPosY();
-
-		int i = 0;
-		while (Collision() != null) {
-			switch (i) {
-            	case 0:
-            		perso.Reculer();
-            		break;
-            	case 1:
-            		perso.Avancer();
-            		perso.Avancer();
-            		break;
-            	case 2:
-            		perso.Reculer();
-            		perso.Droite();
-            		break;
-            	case 3:
-            		perso.Gauche();
-            		perso.Gauche();
-            		break;
-            	default:
-            		System.out.println("RegulMouvement -> Switch i -> incorrect tentative : " + i);
-            		break;
+	private void SuperCollide() {
+		List<Personnage> perso = this.player.getHub().getListPerso();
+		List<Hub.Batiments> batiments = this.player.getHub().getBatiments();
+		
+		for(Personnage pj : perso) {
+			int pjx = pj.getPosX();
+			int pjy = pj.getPosY();
+			for(Personnage pjs : perso) {
+				if(pj != pjs) {
+					if((pjx + 1) == (pjs.getPosX() - pjs.getDimension())){pj.Gauche();} // Droite
+					if((pjx - 1) == (pjs.getPosX() + pjs.getDimension())){pj.Droite();} // Gauche
+					if((pjy + 1) == (pjs.getPosY() - pjs.getDimension())){pj.Avancer();} // Derriere
+					if((pjy - 1) == (pjs.getPosY() + pjs.getDimension())){pj.Reculer();} // Devant
+				}
+				for(Hub.Batiments bat : batiments) {
+					if((pjx + 1) == bat.getPosX()-1){pj.Gauche();} // Droite
+					if((pjx - 1) == (bat.getPosX() + bat.getDimensionX()+1)){pj.Droite();} // Gauche
+					if((pjy + 1) == bat.getPosY()-1){pj.Avancer();} // Derriere
+					if((pjy - 1) == (bat.getPosY() + bat.getDimensionY()+1)){pj.Reculer();} // Devant
+				}
 			}
-
-        if (Collision() != null) {
-            perso.setPosition(prevPosX, prevPosY);
-        }
-
-        i++;
+			if((pjx + 1) >= 850){pj.Gauche();} // Droite
+			if((pjx - 1) <= 50){pj.Droite();} // Gauche
+			if((pjy + 1) >= 650){pj.Avancer();} // Derriere
+			if((pjy - 1) <= 50){pj.Reculer();} // Devant
 		}
 	}
-
-	private Personnage Collision() {
-        List<Personnage> personnages = this.player.getHub().getListPerso();
-        List<Hub.Batiments> batiments = this.player.getHub().getBatiments();
-
-        for (Personnage perso : personnages) {
-            int persoX = perso.getPosX();
-            int persoY = perso.getPosY();
-            int persoWidth = perso.getDimension();
-            int persoHeight = perso.getDimension();
-
-            for (Hub.Batiments batiment : batiments) {
-                int batimentX = batiment.getPosX();
-                int batimentY = batiment.getPosY();
-                int batimentWidth = batiment.getDimensionX();
-                int batimentHeight = batiment.getDimensionY();
-
-                if (persoX < batimentX + batimentWidth &&
-                    persoX + persoWidth > batimentX &&
-                    persoY < batimentY + batimentHeight &&
-                    persoY + persoHeight > batimentY) {
-                    return perso; // On retourne le personnage en collision avec le bâtiment
-                }
-            }
-
-            for (Personnage otherPerso : personnages) {
-                if (otherPerso != perso) {
-                    int otherPersoX = otherPerso.getPosX();
-                    int otherPersoY = otherPerso.getPosY();
-                    int otherPersoWidth = otherPerso.getDimension();
-                    int otherPersoHeight = otherPerso.getDimension();
-
-                    if (persoX < otherPersoX + otherPersoWidth &&
-                        persoX + persoWidth > otherPersoX &&
-                        persoY < otherPersoY + otherPersoHeight &&
-                        persoY + persoHeight > otherPersoY) {
-                        return perso; // On retourne le personnage en collision avec un autre personnage
-                    }
-                }
-            }
-
-            int borderThickness = 20; // Épaisseur de la bordure en pixels
-            int windowWidth = gui.getWidth();
-            int windowHeight = gui.getHeight();
-
-            if (persoX < borderThickness) {return perso;}
-            if (persoX + persoWidth > windowWidth - borderThickness) {return perso;}
-            if (persoY < borderThickness) {return perso;}
-            if (persoY + persoHeight > windowHeight - borderThickness) {return perso;}
-        }
-
-        return null;
-    }
 
 	/*** UPDATES ***/
 
 	public void update(){
 		gui.DrawCharacter(this.player.getHub());
 
-		Personnage pj = Collision();
-		if(pj != null){
-			RegulMouvement(pj);
-		}
+		SuperCollide();
 
 		for(Personnage perso : this.player.getHub().getListPerso()){
 			perso.Deplacer();
