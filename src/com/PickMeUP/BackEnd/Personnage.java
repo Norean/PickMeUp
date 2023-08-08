@@ -900,86 +900,73 @@ public class Personnage{
 		return tmp.get(1) + tmp.get(2) + tmp.get(3);
 	}
 
-	private void TirerUnDon(){
-        Don[] dons = Don.values();
+	private void TirerUnDon() {
+		Don[] dons = Don.values();
         boolean test = true;
 
         do{
         	test = true;
         	Don don = dons[Alea(0,dons.length-1)];
-        
-        	for(String carac : don.getCarac()){
-   				switch(carac){
+        	
+        	for(int i=0; i<don.getCarac().size(); i++) {
+   				switch(don.getCarac().get(i)){
      				case "For":
-      					if(this.force < don.getValeurCarac().get(0))
+      					if(this.force < don.getValeurCarac().get(i))
        						test = false;
        				break;
        				case "Dex":
-       					if(this.dexterite < don.getValeurCarac().get(0))
+       					if(this.dexterite < don.getValeurCarac().get(i))
        						test = false;
        				break;
        				case "Con":
-       					if(this.constitution < don.getValeurCarac().get(0))
+       					if(this.constitution < don.getValeurCarac().get(i))
        						test = false;
        				break;
        				case "Int":
-       					if(this.intelligence < don.getValeurCarac().get(0))
+       					if(this.intelligence < don.getValeurCarac().get(i))
        						test = false;
        				break;
        				case "Sag":
-       					if(this.sagesse < don.getValeurCarac().get(0))
+       					if(this.sagesse < don.getValeurCarac().get(i))
        						test = false;
        				break;
        				case "Cha":
-       					if(this.charisme < don.getValeurCarac().get(0))
+       					if(this.charisme < don.getValeurCarac().get(i))
        						test = false;
        				break;
        				default:
-       					System.out.println("TirerUnDon -> don.getCarac().get(1) -> erreur selection carac : " + don.getCarac().get(1));
+       					System.out.println("TirerUnDon -> don.getCarac().get(1) -> erreur selection carac : " + don.getCarac().get(i));
        				break;
    				}
    			}
-
-   			if(test){
-   				int j = 0;
-   				for(Don tmp : don.getDon()){
-   					if(this.listDons.isEmpty()){
-   						test = false;
-   					}else{
-   						if(chercherDon(this.listDons.get(j).name()) == null){
+        	if(test) {
+        		if(!this.listDons.isEmpty()) {
+        			for(Don tmp : don.getDon()) {
+        				if(chercherDon(tmp.getName()) == null){
    							test = false;
    						}
-   					}
-   					j++;
-   				}		
-   				if(test){
-   					int i = 0;
-   					if(!don.getCompetence().isEmpty()){
-   						for(Competence tmp : don.getCompetence()){
-   							if(this.classe.chercherCompetence(tmp.name()) == null){
-   								test = false;
-   							}else{
-   								if(this.classe.chercherCompetence(tmp.name()).getDegreMaitrise() < don.getDegreMaitriseCompetence().get(i)){
-   									test = false;
-   									i++;
-   								}
-   							}
-   						}
-   					}
-					if(test){
-						if(this.bba < don.getBBA()){
-							test = false;
-						}
-						if(test){
-							if(this.niveau < don.getNiveau()){
-								test = false;
-							}
-						}
-					}	
-   				}
-   			}
-
-   			if(test)
+        			}
+        		}
+        		if(test) {
+        			for(int i=0; i<don.getCompetence().size(); i++) {
+        				if(this.classe.chercherCompetence(don.getCompetence().get(i).getName()).degresMaitrise < don.getDegreMaitriseCompetence().get(i)) {
+        					test = false;
+        				}
+        			}
+        			if(test) {
+        				if(this.niveau < don.getNiveau()) {
+        					test = false;
+        				}
+        				if(test) {
+        					if(this.bba < don.getBBA()) {
+        						test = false;
+        					}
+        				}
+        			}
+        		}
+        	}
+        	
+        	if(test)
    				this.listDons.add(don);
 
         }while(!test);
